@@ -35,7 +35,7 @@ func (m *Metrics) Inc(key string) {
 	metric, exist := m.store.Load(key)
 
 	if !exist {
-		metric = &Metric{value: 0}
+		metric = &Metric{}
 		m.store.Store(key, metric)
 	}
 
