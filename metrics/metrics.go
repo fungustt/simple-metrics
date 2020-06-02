@@ -13,6 +13,8 @@ type Metric struct {
 	value uint64
 }
 
+const ValueNotSet = 0
+
 func NewMetrics() *Metrics {
 	return &Metrics{
 		sync.Map{},
@@ -20,13 +22,23 @@ func NewMetrics() *Metrics {
 }
 
 func (m *Metrics) Get(key string) uint64 {
-	metric, _ := m.store.LoadOrStore(key, &Metric{value: 0})
+	metric, exist := m.store.Load(key)
+
+	if !exist {
+		return ValueNotSet
+	}
 
 	return metric.(*Metric).value
 }
 
 func (m *Metrics) Inc(key string) {
-	metric, _ := m.store.LoadOrStore(key, &Metric{value: 0})
+	metric, exist := m.store.Load(key)
+
+	if !exist {
+		metric = &Metric{value: 0}
+		m.store.Store(key, metric)
+	}
+
 	metric.(*Metric).inc()
 }
 
